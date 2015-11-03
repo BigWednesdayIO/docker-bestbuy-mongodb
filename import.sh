@@ -7,17 +7,11 @@ if [ -z ${BESTBUY_API_KEY} ]; then
   exit 1
 fi
 
-if [ -z ${BESTBUY_ARCHIVE} ]; then
-  echo "Required environment variable BESTBUY_ARCHIVE not set."
-  exit 1
-fi
+mkdir -p /tmp/bestbuydata
+cd /tmp/bestbuydata
 
-cd /tmp
-
-curl "http://api.bestbuy.com/v1/$BESTBUY_ARCHIVE.json.zip?apiKey=$BESTBUY_API_KEY" > archive.zip
+curl -L "http://api.bestbuy.com/v1/subsets/productsActive.json.zip?apiKey=$BESTBUY_API_KEY" > archive.zip
 
 unzip archive.zip
 
-cd archive
-
-for f in *.json; do mongoimport --jsonArray --db bestbuy --collection $BESTBUY_ARCHIVE $f; done
+for f in *.json; do mongoimport --jsonArray --db bestbuy --collection products $f; done
